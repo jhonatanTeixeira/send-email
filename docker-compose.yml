@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+    php:
+        build: .
+        links:
+            - mysql:database
+            - redis
+        depends_on:
+            - mysql
+            - redis
+        ports:
+            - 8000:8000
+        working_dir: /var/www
+        command: sh -c "./artisan migrate && ./artisan serve"
+
+    jobs:
+        build: .
+        links:
+            - mysql:database
+            - redis
+        depends_on:
+            - mysql
+            - redis
+        working_dir: /var/www
+        command: sh -c "./artisan queue:work --tries=1 -vvv"
+
+    mysql:
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: sendmail
+
+    redis:
+        image: redis:3.2-alpine
